@@ -1,0 +1,84 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "email": "admin@example.com",
+      "password": "admin123",
+      "role": "admin"
+    },
+    {
+      "id": 2,
+      "email": "manager@example.com",
+      "password": "manager123",
+      "role": "manager"
+    },
+    {
+      "id": 3,
+      "email": "manager2@example.com",
+      "password": "manager123",
+      "role": "manager"
+    },
+    {
+      "id": 4,
+      "email": "pm@example.com",
+      "password": "pm123",
+      "role": "pm"
+    },
+    {
+      "id": 5,
+      "email": "pm2@example.com",
+      "password": "pm123",
+      "role": "pm"
+    },
+    {
+      "id": 6,
+      "email": "engineer1@example.com",
+      "password": "eng123",
+      "role": "engineer"
+    },
+    {
+      "id": 7,
+      "email": "engineer2@example.com",
+      "password": "eng456",
+      "role": "engineer"
+    }, 
+    {
+      "id": 8,
+      "email": "engineer3@example.com",
+      "password": "eng456",
+      "role": "engineer"
+    }
+  ],
+  "teams": [
+    {
+      "id": 1,
+      "name": "Team 1",
+      "managerId": 2,
+      "pmId": 4,
+      "engineerIds": [6, 7]
+    },
+    {
+      "id": 2,
+      "name": "Team 2",
+      "managerId": 3,
+      "pmId": 5,
+      "engineerIds": [8]
+    }
+  ],
+  "tasks": [
+    {
+      "id": 1,
+      "title": "Fix Bug in Authentication",
+      "description": "There is a bug in the authentication flow. Need to investigate.",
+      "status": "In Progress",
+      "assignedTo": 6
+    },
+    {
+      "id": 2,
+      "title": "Create User Registration Page",
+      "description": "Design and implement the user registration form.",
+      "status": "Ready",
+      "assignedTo": 8
+    }
+  ]
+}
