@@ -1,105 +1,126 @@
-const { getAllTasks, createTask, updateTask, deleteTask, changeTaskStatus, findTaskById } = require('../models/tasks');
+const Task = require('../models/tasks');
 
-// Get all tasks
-const getTasks = async (req, res) => {
-    try {
-        const tasks = await getAllTasks();
-        res.json(tasks);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+const createTask = async (req, res) => {
+  const { title, description, status, assignedTo } = req.body;
+  try {
+    const newTask = await Task.create({ title, description, status, assignedTo });
+    return res.status(201).json({ message: 'Task created successfully', task: newTask });
+  } catch (err) {
+    console.error('Error creating task:', err);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
 };
 
-// Create a new task
-const createTaskController = async (req, res) => {
-    const { title, description, status, assignedTo } = req.body;
-    if (!title || title.trim() === '') {
-        return res.status(400).json({error: 'Title is required'});
+const getTaskById = async (req, res) => {
+  const { taskId } = req.params;
+  const { teamId } = req.user;
+  try {
+    console.log(`Manager's teamId from JWT: ${teamId}`);
+    const task = await Task.findById(taskId);
+    if (!task) {
+      return res.status(404).json({ message: 'Task not found' });
     }
-    if (!description || description.trim() === '') {
-        return res.status(400).json({ error: 'Description is required' });
+    console.log(`Task's teamId: ${task.teamId}`);
+    if (task.teamId !== teamId) {
+      return res.status(403).json({ message: 'Access Denied: You cannot view tasks from other teams'});
     }
-    if (assignedTo !== undefined && assignedTo !== null && typeof assignedTo !== 'number') {
-        return res.status(400).json({ error: 'AssignedTo must be a valid user ID or null' });
-    }
-    if (!['Ready', 'In Progress', 'Done'].includes(status)) {
-        return res.status(400).json({ error: 'Status must be one of "Ready", "In Progress", "Done"' });
-    }
-    try {
-        const taskId = await createTask(title, description, status, assignedTo);
-        res.status(201).json({ message: 'Task created', taskId });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+    return res.status(200).json({ task });
+  } catch (err) {
+    console.error('Error fetching task:', err);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
 };
 
-// Update task info
-const updateTaskController = async (req, res) => {
-    const { id } = req.params;
-    const { title, description, status, assignedTo } = req.body;
-
-    // Ensure the task exists
-    try {
-        const task = await findTaskById(id);
-        if (!task) {
-            return res.status(404).json({ error: 'Task not found' });
-        }
-
-        // Validate fields
-        if (title && title.trim() === '') {
-            return res.status(400).json({ error: 'Title cannot be empty' });
-        }
-        if (description && description.trim() === '') {
-            return res.status(400).json({ error: 'Description cannot be empty' });
-        }
-        if (assignedTo !== undefined && assignedTo !== null && typeof assignedTo !== 'number') {
-            return res.status(400).json({ error: 'AssignedTo must be a valid user ID (integer) or null' });
-        }
-        if (status && !['Ready', 'In Progress', 'Done'].includes(status)) {
-            return res.status(400).json({ error: 'Status must be one of "Ready", "In Progress", "Done"' });
-        }
-
-        // Update task
-        await updateTask(id, title, description, status, assignedTo);
-        res.json({ message: 'Task updated' });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+// Get tasks by assigned engineer
+const getTasksByEngineer = async (req, res) => {
+  const { engineerId } = req.params;
+  try {
+    const tasks = await Task.findByAssignedTo(engineerId);
+    return res.status(200).json({ tasks });
+  } catch (err) {
+    console.error('Error fetching tasks for engineer:', err);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
 };
 
-// Delete a task
-const deleteTaskController = async (req, res) => {
-    const { id } = req.params;
-    try {
-        const task = await findTaskById(id); 
-        if (!task) {
-            return res.status(404).json({ error: 'Task not found' });
-        }
-
-        await deleteTask(id);
-        res.json({ message: 'Task deleted' });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+const getAllTasksInTeam = async (req, res) => {
+  const { teamId } = req.user;
+  try {
+    const tasks = await Task.findByTeam(teamId);
+    return res.status(200).json({ tasks });
+  } catch (err) {
+    console.error('Error fetching tasks for team:', err);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
 };
 
-// Change task status
-const changeTaskStatusController = async (req, res) => {
-    const { id } = req.params;
-    const { status } = req.body;
-    try {
-        const task = await findTaskById(id);
-        if (!task) {
-            return res.status(404).json({ error: 'Task not found' });
-        }
-        if (!['Ready', 'In Progress', 'Done'].includes(status)) {
-            return res.status(400).json({ error: 'Status must be one of "Ready", "In Progress", "Done"' });
-        }
-        await changeTaskStatus(id, status);
-        res.json({ message: 'Task status updated' });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+// Update task status (Ready, In Progress, Done)
+const updateTaskStatus = async (req, res) => {
+  const { status } = req.body;
+  const { taskId } = req.params;
+  const userId = req.user.userId;
+  
+  if (!status) {
+    return res.status(400).json({ message: 'Status is required' });
+  }
+
+  try {
+    // Fetch task by ID
+    const task = await Task.findById(taskId);
+    if (!task) {
+      console.log(`Task with ID ${taskId} not found`);
+      return res.status(404).json({ message: 'Task not found' });
     }
+    
+    // Check if the task is assigned to the user requesting the update
+    if (task.assignedTo !== userId) {
+      return res.status(403).json({ message: 'You are not authorized to update this task' });
+    }
+    
+    // If user is authorized, update status
+    const updatedTask = await Task.updateStatus(taskId, status);
+    return res.status(200).json({
+      message: 'Task status updated',
+      task: updatedTask,
+    });
+  } catch (err) {
+    console.error('Error updating task status:', err);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
 };
 
-module.exports = { getTasks, createTaskController, updateTaskController, deleteTaskController, changeTaskStatusController };
+
+// Update task details (title, description, etc.)
+const updateTask = async (req, res) => {
+  const { taskId } = req.params;
+  const { title, description, status, assignedTo } = req.body;
+
+  try {
+    const updatedTask = await Task.update(taskId, { title, description, status, assignedTo });
+    return res.status(200).json({ message: 'Task updated successfully', task: updatedTask });
+  } catch (err) {
+    console.error('Error updating task:', err);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+const deleteTask = async (req, res) => {
+  const { taskId } = req.params;
+  try {
+    await Task.delete(taskId);
+    return res.status(200).json({ message: 'Task deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting task:', err);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+module.exports = {
+  createTask,
+  getTaskById,
+  getTasksByEngineer,
+  updateTaskStatus,
+  updateTask,
+  deleteTask,
+  getAllTasksInTeam,
+};

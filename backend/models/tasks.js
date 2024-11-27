@@ -1,71 +1,114 @@
-const db = require('./database');
+const db = require('../data/database');
 
-// Get all tasks
-const getAllTasks = () => {
+class Task {
+  static async create({ title, description, status, assignedTo }) {
     return new Promise((resolve, reject) => {
-        db.all('SELECT * FROM tasks', (err, rows) => {
-            if (err) reject(err);
-            resolve(rows);
-        });
-    });
-};
+      // Get the teamId based on the assigned user's team
+      db.get('SELECT teamId FROM users WHERE id = ?', [assignedTo], (err, row) => {
+        if (err) {
+          return reject(err);
+        }
+        if (!row) {
+          return reject(new Error(`User with id ${assignedTo} does not exist or has no associated team`));
+        }
+        const teamId = row.teamId;
 
-// Find task by ID
-const findTaskById = (id) => {
+        // Create the task - associate it with the teamId
+        db.run(
+          'INSERT INTO tasks (title, description, status, assignedTo, teamId) VALUES (?, ?, ?, ?, ?)',
+          [title, description, status, assignedTo, teamId],
+          function (err) {
+            if (err) {
+              return reject(err);
+            }
+            resolve({
+              id: this.lastID,
+              title,
+              description,
+              status,
+              assignedTo,
+              teamId,
+            });
+          }
+        );
+      });
+    });
+  }
+
+  static async findById(id) {
     return new Promise((resolve, reject) => {
-        db.get('SELECT * FROM tasks WHERE id = ?', [id], (err, row) => {
-            if (err) reject(err);
-            resolve(row);
-        });
+      console.log(`Looking for task with ID ${id}`);
+      db.get('SELECT * FROM tasks WHERE id = ?', [id], (err, row) => {
+        if (err) {
+          console.error('Error fetching task: ', err);
+          reject(err);
+        } else {
+          if (!row) {
+            console.log(`Task with ID ${id} not found`);
+          }
+          resolve(row);
+        }
+      });
     });
-};
+  }
 
-// Create a new task
-const createTask = (title, description, status, assignedTo) => {
+  static async findByAssignedTo(engineerId) {
     return new Promise((resolve, reject) => {
-        const stmt = db.prepare('INSERT INTO tasks (title, description, status, assigned_to) VALUES (?, ?, ?, ?)');
-        stmt.run(title, description, status, assignedTo, function (err) {
-            if (err) reject(err);
-            resolve(this.lastID);
-        });
-        stmt.finalize();
+      db.all('SELECT * FROM tasks WHERE assignedTo = ?', [engineerId], (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows);
+      });
     });
-};
+  }
 
-// Update task
-const updateTask = (id, title, description, status, assignedTo) => {
+  static async findByTeam(teamId) {
     return new Promise((resolve, reject) => {
-        const stmt = db.prepare('UPDATE tasks SET title = ?, description = ?, status = ?, assigned_to = ? WHERE id = ?');
-        stmt.run(title, description, status, assignedTo, id, (err) => {
-            if (err) reject(err);
-            resolve();
-        });
-        stmt.finalize();
+      db.all('SELECT * FROM tasks WHERE teamId = ?', [teamId], (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows);
+      });
     });
-};
+  }
 
-// Delete task
-const deleteTask = (id) => {
+  static async updateStatus(id, status) {
     return new Promise((resolve, reject) => {
-        const stmt = db.prepare('DELETE FROM tasks WHERE id = ?');
-        stmt.run(id, (err) => {
-            if (err) reject(err);
-            resolve();
-        });
-        stmt.finalize();
+      db.run(
+        'UPDATE tasks SET status = ? WHERE id = ?',
+        [status, id],
+        function (err) {
+          if (err) reject(err);
+          else {
+            db.get('SELECT * FROM tasks WHERE id = ?', [id], (err, row) => {
+              if (err) reject(err);
+              else resolve(row);
+            })
+          }
+        }
+      );
     });
-};
+  }
 
-// Change task status
-const changeTaskStatus = (id, status) => {
+  static async update(id, { title, description, status, assignedTo }) {
     return new Promise((resolve, reject) => {
-        const stmt = db.prepare('UPDATE tasks SET status = ? WHERE id = ?');
-        stmt.run(status, id, (err) => {
-            if (err) reject(err);
-            resolve();
-        });
-        stmt.finalize();
+      db.run(
+        'UPDATE tasks SET title = ?, description = ?, status = ?, assignedTo = ? WHERE id = ?',
+        [title, description, status, assignedTo, id],
+        function (err) {
+          if (err) reject(err);
+          else resolve({ id, title, description, status, assignedTo });
+        }
+      );
     });
-};
+  }
 
-module.exports = { getAllTasks, createTask, updateTask, deleteTask, changeTaskStatus };
+  static async delete(id) {
+    return new Promise((resolve, reject) => {
+      db.run('DELETE FROM tasks WHERE id = ?', [id], function (err) {
+        if (err) reject(err);
+        else resolve({ id });
+      });
+    });
+  }
+}
+
+module.exports = Task;

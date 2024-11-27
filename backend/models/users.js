@@ -1,49 +1,70 @@
-const db = require('./database');
+const db = require('../data/database');
+const bcrypt = require('bcryptjs');
 
-// Get all users
-const getAllUsers = () => {
+class User {
+  static async create({ name, email, password, role, teamId }) {
+    const hashedPassword = await bcrypt.hash(password, 10);
     return new Promise((resolve, reject) => {
-        db.all('SELECT * FROM users', (err, rows) => {
-            if (err) reject(err);
-            resolve(rows);
-        });
+      db.run(
+        'INSERT INTO users (name, email, password, role, teamId) VALUES (?, ?, ?, ?, ?)',
+        [name, email, hashedPassword, role, teamId],
+        function (err) {
+          if (err) reject(err);
+          else resolve({ id: this.lastID, name, email, role, teamId });
+        }
+      );
     });
-};
+  }
 
-// Create a new user
-const createUser = (email, password, role) => {
+  static async findById(id) {
     return new Promise((resolve, reject) => {
-        const stmt = db.prepare('INSERT INTO users (email, password, role) VALUES (?, ?, ?)');
-        stmt.run(email, password, role, function (err) {
-            if (err) reject(err);
-            resolve(this.lastID);
-        });
-        stmt.finalize();
+      db.get('SELECT * FROM users WHERE id = ?', [id], (err, row) => {
+        if (err) reject(err);
+        else resolve(row);
+      });
     });
-};
+  }
 
-// Update user
-const updateUser = (id, email, password, role) => {
+  // Check 
+  static async findByEmail(email) {
     return new Promise((resolve, reject) => {
-        const stmt = db.prepare('UPDATE users SET email = ?, password = ?, role = ? WHERE id = ?');
-        stmt.run(email, password, role, id, (err) => {
-            if (err) reject(err);
-            resolve();
-        });
-        stmt.finalize();
+      db.get('SELECT * FROM users WHERE email = ?', [email], (err, row) => {
+        if (err) reject(err);
+        else resolve(row);
+      });
     });
-};
+  }
 
-// Delete user
-const deleteUser = (id) => {
+  static async findByTeam(teamId) {
     return new Promise((resolve, reject) => {
-        const stmt = db.prepare('DELETE FROM users WHERE id = ?');
-        stmt.run(id, (err) => {
-            if (err) reject(err);
-            resolve();
-        });
-        stmt.finalize();
+      db.all('SELECT * FROM users WHERE teamId = ?', [teamId], (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows);
+      });
     });
-};
+  }
 
-module.exports = { getAllUsers, createUser, updateUser, deleteUser };
+  static async update(id, { name, email, password, role, teamId }) {
+    const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
+    const sql = 'UPDATE users SET name = ?, email = ?, password = ?, role = ?, teamId = ? WHERE id = ?';
+    const params = [name, email, hashedPassword || undefined, role, teamId, id];
+
+    return new Promise((resolve, reject) => {
+      db.run(sql, params, function (err) {
+        if (err) reject(err);
+        else resolve({ id, name, email, role, teamId });
+      });
+    });
+  }
+
+  static async delete(id) {
+    return new Promise((resolve, reject) => {
+      db.run('DELETE FROM users WHERE id = ?', [id], function (err) {
+        if (err) reject(err);
+        else resolve({ id });
+      });
+    });
+  }
+}
+
+module.exports = User;
