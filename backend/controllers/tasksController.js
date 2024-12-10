@@ -1,9 +1,15 @@
 const Task = require('../models/tasks');
 
 const createTask = async (req, res) => {
-  const { title, description, status, assignedTo } = req.body;
+  const { title, description, status, assignedTo, dueDate, priority, comments } = req.body;
+  const userId = req.user.userId;
+
+  if (!title || !description || !dueDate || !priority) {
+    return res.status(400).json({ error: "Title, description, due date, and priority are required" });
+  }
+
   try {
-    const newTask = await Task.create({ title, description, status, assignedTo });
+    const newTask = await Task.create({ title, description, status, assignedTo, dueDate, priority, comments, userId });
     return res.status(201).json({ message: 'Task created successfully', task: newTask });
   } catch (err) {
     console.error('Error creating task:', err);
@@ -93,10 +99,10 @@ const updateTaskStatus = async (req, res) => {
 // Update task details (title, description, etc.)
 const updateTask = async (req, res) => {
   const { taskId } = req.params;
-  const { title, description, status, assignedTo } = req.body;
+  const { title, description, status, assignedTo, dueDate, priority, comments } = req.body;
 
   try {
-    const updatedTask = await Task.update(taskId, { title, description, status, assignedTo });
+    const updatedTask = await Task.update(taskId, { title, description, status, assignedTo, dueDate, priority, comments });
     return res.status(200).json({ message: 'Task updated successfully', task: updatedTask });
   } catch (err) {
     console.error('Error updating task:', err);

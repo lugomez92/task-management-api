@@ -32,12 +32,29 @@ class Team {
     });
   }
 
+  // Fetches Manager and PM in the team
   static async getTeamMembers(teamId) {
     return new Promise((resolve, reject) => {
       db.all('SELECT * FROM users WHERE teamId = ?', [teamId], (err, rows) => {
         if (err) reject(err);
         else resolve(rows);
       });
+    });
+  }
+
+  // Fetches engineers in the team
+  static async getEngineersInTeam(teamId) {
+    return new Promise((resolve, reject) => {
+      db.all(
+        `SELECT users.* FROM users
+         JOIN team_engineers ON users.id = team_engineers.engineerId
+         WHERE team_engineers.teamId = ?`,
+        [teamId],
+        (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows);
+        } 
+      );
     });
   }
 

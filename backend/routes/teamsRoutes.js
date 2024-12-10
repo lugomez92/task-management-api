@@ -27,4 +27,8 @@ router.get('/:teamId', authenticateToken, authorizeRole(['admin']), teamsControl
 // Admin only: Get all teams
 router.get('/', authenticateToken, authorizeRole(['admin']), teamsController.getAllTeams);
 
+// Adminm manager, pm & engineer: Get all engineers in a team
+router.get('/:teamId/engineers', authenticateToken, authorizeRole(['admin', 'manager', 'pm', 'engineer']), teamsController.getEngineersInTeam);
+
+
 module.exports = router;

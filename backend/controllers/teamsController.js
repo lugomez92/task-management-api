@@ -8,7 +8,7 @@ const createTeam = async (req, res) => {
     return res.status(201).json({ message: 'Team created successfully', team: newTeam });
   } catch (err) {
     console.error('Error creating team:', err);
-    return res.status(500).json({ message: 'Internal server error' });
+    return res.status(500).json({ message: 'Internal server error', error: err.message });
   }
 };
 
@@ -30,6 +30,18 @@ const getAllTeams = async (req, res) => {
     return res.status(200).json({ teams });
   } catch (err) {
     console.error('Error fetching all teams:', err);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// Get all engineers in a specific team
+const getEngineersInTeam = async (req, res) => {
+  const { teamId } = req.params;
+  try {
+    const engineers = await Team.getEngineersInTeam(teamId);
+    return res.status(200).json({ engineers });
+  } catch (err) {
+    console.error('Error fetching engineers in team: ', err);
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -101,6 +113,7 @@ module.exports = {
   createTeam,
   getTeam,
   getAllTeams,
+  getEngineersInTeam,
   addEngineersToTeam,
   removeEngineersFromTeam,
   moveUserToAnotherTeam,

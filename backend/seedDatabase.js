@@ -17,7 +17,7 @@ const insertUser = (user) => {
     try {
       // Hash the password
       const hashedPassword = await bcrypt.hash(user.password, 10);
-      db.run("INSERT INTO users (id, email, password, role) VALUES (?, ?, ?, ?)", [user.id, user.email, hashedPassword, user.role], (err) => {
+      db.run("INSERT INTO users (id, name, email, password, role) VALUES (?, ?, ?, ?, ?)", [user.id, user.name, user.email, hashedPassword, user.role], (err) => {
         if (err) {
           console.error('Error inserting user:', err);
           reject(err);
@@ -62,7 +62,7 @@ const seedTeams = () => {
 // Function to insert tasks into the database
 const seedTasks = () => {
   // Prepare the statement to insert tasks with a placeholder for teamId
-  const insertTask = db.prepare("INSERT INTO tasks (id, title, description, status, assignedTo, teamId) VALUES (?, ?, ?, ?, ?, ?)");
+  const insertTask = db.prepare("INSERT INTO tasks (id, title, description, status, assignedTo, teamId, dueDate, priority, comments) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
   // This array will hold all the promises for inserting tasks
   const insertPromises = seedData.tasks.map((task) => {
@@ -80,7 +80,7 @@ const seedTasks = () => {
           const teamId = row.teamId;
 
           // Insert the task into the database
-          insertTask.run(task.id, task.title, task.description, task.status, assignedUserId, teamId, (err) => {
+          insertTask.run(task.id, task.title, task.description, task.status, assignedUserId, teamId, task.dueDate, task.priority, task.comments, (err) => {
             if (err) {
               console.error('Error inserting task:', err);
               reject(err);

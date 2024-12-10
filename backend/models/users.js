@@ -2,6 +2,15 @@ const db = require('../data/database');
 const bcrypt = require('bcryptjs');
 
 class User {
+  static async getAll() {
+    return new Promise((resolve, reject) => {
+      db.all('SELECT id, name, email, role, teamId FROM users', (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows);
+      });
+    });
+  }
+
   static async create({ name, email, password, role, teamId }) {
     const hashedPassword = await bcrypt.hash(password, 10);
     return new Promise((resolve, reject) => {
