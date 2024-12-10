@@ -1,10 +1,10 @@
 const db = require('../data/database');
 
 class Task {
-  static async create({ title, description, status, assignedTo }) {
+  static async create({ title, description, assignedTo, dueDate, priority, comments, userId, status = 'Ready' }) {
     return new Promise((resolve, reject) => {
-      // Get the teamId based on the assigned user's team
-      db.get('SELECT teamId FROM users WHERE id = ?', [assignedTo], (err, row) => {
+      // Get the teamId based on the user who is creating the task (Manager or PM)
+      db.get('SELECT teamId FROM users WHERE id = ?', [userId], (err, row) => {
         if (err) {
           return reject(err);
         }
@@ -15,8 +15,8 @@ class Task {
 
         // Create the task - associate it with the teamId
         db.run(
-          'INSERT INTO tasks (title, description, status, assignedTo, teamId) VALUES (?, ?, ?, ?, ?)',
-          [title, description, status, assignedTo, teamId],
+          'INSERT INTO tasks (title, description, status, assignedTo, teamId, dueDate, priority, comments) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+          [title, description, status, assignedTo || null, teamId, dueDate, priority, comments || null],
           function (err) {
             if (err) {
               return reject(err);
@@ -26,8 +26,11 @@ class Task {
               title,
               description,
               status,
-              assignedTo,
+              assignedTo: assignedTo || null,
               teamId,
+              dueDate,
+              priority,
+              comments: comments || null,
             });
           }
         );
@@ -88,14 +91,14 @@ class Task {
     });
   }
 
-  static async update(id, { title, description, status, assignedTo }) {
+  static async update(id, { title, description, status, assignedTo, dueDate, priority, comments }) {
     return new Promise((resolve, reject) => {
       db.run(
-        'UPDATE tasks SET title = ?, description = ?, status = ?, assignedTo = ? WHERE id = ?',
-        [title, description, status, assignedTo, id],
+        'UPDATE tasks SET title = ?, description = ?, status = ?, assignedTo = ?, dueDate = ?, priority = ?, comments = ? WHERE id = ?',
+        [title, description, status, assignedTo, dueDate, priority, comments, id],
         function (err) {
           if (err) reject(err);
-          else resolve({ id, title, description, status, assignedTo });
+          else resolve({ id, title, description, status, assignedTo, dueDate, priority, comments });
         }
       );
     });

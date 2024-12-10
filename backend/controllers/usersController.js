@@ -6,14 +6,24 @@ const dotenv = require('dotenv');
 dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET;
 
+// Get all users (Admin Only)
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.getAll();
+    return res.status(200).json({ users });
+  } catch (err) {
+    console.error('Error fetching all users:', err);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
 // Create new user (Admin Only)
 const createUser = async (req, res) => {
   const { name, email, password, role, teamId } = req.body;
   try {
     const existingUser = await User.findByEmail(email);
     if (existingUser) return res.status(400).json({ message: 'User already exists' });
-
-    const newUser = await User.create({ name, email, password, role, teamId });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = await User.create({ name, email, password: hashedPassword, role, teamId });
     return res.status(201).json({ message: 'User created successfully', user: newUser });
   } catch (err) {
     console.error('Error creating user:', err);
@@ -27,7 +37,8 @@ const updateUser = async (req, res) => {
   const { name, email, password, role, teamId } = req.body;
 
   try {
-    const updatedUser = await User.update(id, { name, email, password, role, teamId });
+    const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
+    const updatedUser = await User.update(id, { name, email, password: hashedPassword, role, teamId });
     return res.status(200).json({ message: 'User updated successfully', user: updatedUser });
   } catch (err) {
     console.error('Error updating user:', err);
@@ -76,6 +87,7 @@ const getUserById = async (req, res) => {
 };
 
 module.exports = {
+  getAllUsers,
   createUser,
   updateUser,
   deleteUser,

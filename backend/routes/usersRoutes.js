@@ -3,6 +3,9 @@ const router = express.Router();
 const usersController = require('../controllers/usersController');
 const { authenticateToken, authorizeRole } = require('../middleware/basicAuth');
 
+// Admin only: Get all users
+router.get('/', authenticateToken, authorizeRole(['admin']), usersController.getAllUsers);
+
 // Admin only: create new user
 router.post('/', authenticateToken, authorizeRole(['admin']), usersController.createUser);
 

@@ -13,9 +13,16 @@ const userRoutes = require('./routes/usersRoutes');
 // Load environment variables
 dotenv.config();
 console.log(process.env.JWT_SECRET);
+if (!process.env.JWT_SECRET) {
+  console.error('JWT_SECRET is not set!');
+  process.exit(1);
+}
 
 // Middleware setup
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000',
+  methods: ['GET', 'POST', 'DELETE', 'PATCH', 'PUT'],
+}));
 app.use(express.json());
 
 // Test DB Route (returns list of tables)
@@ -29,7 +36,7 @@ app.get('/test-db', (req, res) => {
   });
 });
 
-// Authentication routes
+// Auth routes
 app.use('/auth', authRoutes);
 // Task routes
 app.use('/api/tasks', taskRoutes); 
