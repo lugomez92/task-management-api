@@ -75,7 +75,7 @@ class Team {
   static async addEngineers(teamId, engineerIds) {
     return new Promise((resolve, reject) => {
       const placeholders = engineerIds.map(() => '(?, ?)').join(',');
-      const sql = `INSERT INTO team_engineers (teamId, userId) VALUES ${placeholders}`;
+      const sql = `INSERT INTO team_engineers (teamId, engineerId) VALUES ${placeholders}`;
       const params = engineerIds.flatMap((userId) => [teamId, userId]);
 
       db.run(sql, params, function (err) {
@@ -89,7 +89,7 @@ class Team {
   static async removeEngineers(teamId, engineerIds) {
     return new Promise((resolve, reject) => {
       const placeholders = engineerIds.map(() => '?').join(',');
-      const sql = `DELETE FROM team_engineers WHERE teamId = ? AND userId IN (${placeholders})`;
+      const sql = `DELETE FROM team_engineers WHERE teamId = ? AND engineerId IN (${placeholders})`;
       const params = [teamId, ...engineerIds];
 
       db.run(sql, params, function (err) {
