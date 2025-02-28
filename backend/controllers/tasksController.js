@@ -100,19 +100,29 @@ const updateTaskStatus = async (req, res) => {
 const updateTask = async (req, res) => {
   const { taskId } = req.params;
   const { title, description, status, assignedTo, dueDate, priority, comments } = req.body;
-
+  
   try {
+    const existingTask = await Task.findById(taskId);
+    if (!existingTask) {
+      return res.status(404).json({ message: 'Task not found' });
+    } 
+  
     const updatedTask = await Task.update(taskId, { title, description, status, assignedTo, dueDate, priority, comments });
     return res.status(200).json({ message: 'Task updated successfully', task: updatedTask });
   } catch (err) {
     console.error('Error updating task:', err);
     return res.status(500).json({ message: 'Internal server error' });
-  }
+  } 
 };
 
 const deleteTask = async (req, res) => {
   const { taskId } = req.params;
   try {
+    const existingTask = await Task.findById(taskId);
+    if (!existingTask) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
+    
     await Task.delete(taskId);
     return res.status(200).json({ message: 'Task deleted successfully' });
   } catch (err) {

@@ -63,7 +63,7 @@ const addEngineersToTeam = async (req, res) => {
   const { teamId, engineerIds } = req.body;
   try {
     await Team.addEngineers(teamId, engineerIds);
-    return res.status(200).json({ message: 'Engineers added to team' });
+    return res.status(200).json({ message: 'Engineers added to team', engineerIds });
   } catch (err) {
     console.error('Error adding engineers:', err);
     return res.status(500).json({ message: 'Internal server error' });

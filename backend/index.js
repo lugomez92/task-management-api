@@ -9,6 +9,7 @@ const authRoutes = require('./routes/authRoutes');
 const taskRoutes = require('./routes/tasksRoutes');
 const teamRoutes = require('./routes/teamsRoutes');
 const userRoutes = require('./routes/usersRoutes');
+const { authenticateToken } = require('./middleware/basicAuth');
 
 // Load environment variables
 dotenv.config();
@@ -26,7 +27,7 @@ app.use(cors({
 app.use(express.json());
 
 // Test DB Route (returns list of tables)
-app.get('/test-db', (req, res) => {
+app.get('/test-db', authenticateToken, (req, res) => {
   db.all("SELECT name FROM sqlite_master WHERE type='table'", [], (err, rows) => {
     if (err) {
       res.status(500).json({ error: err.message });
@@ -49,6 +50,10 @@ app.get('/', (req,res) => {
   res.send('Task Management API is running');
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+  });
+}
+
+module.exports = app;

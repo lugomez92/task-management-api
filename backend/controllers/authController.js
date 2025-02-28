@@ -6,21 +6,31 @@ const db = require('../data/database');
 const register = (req, res) => {
   const { email, password, role } = req.body;
 
-  // Hash password
-  bcrypt.hash(password, 10, (err, hashedPassword) => {
+  db.get('SELECT * FROM users WHERE email = ?', [email], (err, user) => {
     if (err) {
-      return res.status(500).json({ message: 'Error hashing password', error: err });
+      return res.status(500).json({ message: 'Error checking if user exists', error: err });
     }
 
-    // Insert user into database
-    const stmt = db.prepare("INSERT INTO users (email, password, role) VALUES (?, ?, ?)");
-    stmt.run(email, hashedPassword, role, (err) => {
+    if (user) {
+      return res.status(400).json({ message: 'User already exists' });
+    }
+
+    // Hash password
+    bcrypt.hash(password, 10, (err, hashedPassword) => {
       if (err) {
-        return res.status(500).json({ message: 'Error saving user', error: err });
+        return res.status(500).json({ message: 'Error hashing password', error: err });
       }
-      res.status(201).json({ message: 'User registered successfully' });
+
+      // Insert user into database
+      const stmt = db.prepare("INSERT INTO users (email, password, role) VALUES (?, ?, ?)");
+      stmt.run(email, hashedPassword, role, function (err) {
+        if (err) {
+          return res.status(500).json({ message: 'Error saving user', error: err });
+        }
+        res.status(201).json({ message: 'User registered successfully' });
+      });
+      stmt.finalize();
     });
-    stmt.finalize();
   });
 };
 
@@ -30,13 +40,20 @@ const login = (req, res) => {
 
   // Check if user exists
   db.get("SELECT * FROM users WHERE email = ?", [email], (err, user) => {
+    console.log('User found:', user);
     if (err || !user) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
     // Compare password
     bcrypt.compare(password, user.password, (err, match) => {
+      console.log('Password match status:', match);
       if (err || !match) {
+        console.log('Error comparing password:', err);
+        return res.status(400).json({ message: 'Invalid credentials' });
+      }
+      if (!match) {
+        console.log('Passwords do not match');
         return res.status(400).json({ message: 'Invalid credentials' });
       }
 
@@ -50,6 +67,8 @@ const login = (req, res) => {
         process.env.JWT_SECRET, 
         { expiresIn: '1h' }
       );
+
+      console.log('JWT_SECRET:', process.env.JWT_SECRET);
 
       res.status(200).json({ token });
     });
