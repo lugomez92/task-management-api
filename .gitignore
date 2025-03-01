@@ -1,1 +1,32 @@
+# Node dependencies
 node_modules
+
+# system files
+.DS_Store
+
+# Logs
+logs
+*.log
+nm-debug.log*
+
+# Dep. directories
+jspm_packages/
+
+# npm cache
+.npm
+
+# eslint cache
+.eslintcache
+
+# REPL history
+.node_repl_history
+
+# dotenv file
+.env
+
+# Build
+dist/
+build/
+
+#Docker
+docker-compose.override.yml
