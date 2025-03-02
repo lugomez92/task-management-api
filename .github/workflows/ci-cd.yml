@@ -28,6 +28,9 @@ jobs:
         with:
           node-version: '20.12.0'
 
+      - name: Environment Variables
+        run: echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> $GITHUB_ENV
+
       - name: Install backend dependencies
         run: npm install
         working-directory: ./backend
