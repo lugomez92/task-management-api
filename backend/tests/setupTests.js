@@ -99,6 +99,7 @@ async function seedTestDatabase() {
     await new Promise((resolve, reject) => {
       db.run("INSERT INTO users (id, name, email, password, role, teamId) VALUES (?, ?, ?, ?, ?, ?)", [user.id, user.name, user.email, hashedPassword, user.role, user.teamId], (err) => {
         if (err) reject(err);
+        console.log(`User inserted: ${user.name}`);
         resolve();
       });
     });
@@ -109,6 +110,7 @@ async function seedTestDatabase() {
     await new Promise((resolve, reject) => {
       db.run("INSERT INTO teams (id, name, managerId, pmId) VALUES (?, ?, ?, ?)", [team.id, team.name, team.managerId, team.pmId], (err) => {
         if (err) reject(err);
+        console.log(`Team inserted: ${team.name}`);
         resolve();
       });
     });
@@ -117,6 +119,7 @@ async function seedTestDatabase() {
       await new Promise((resolve, reject) => {
         db.run("INSERT INTO team_engineers (teamId, engineerId) VALUES (?, ?)", [team.id, engineerId], (err) => {
           if (err) reject(err);
+          console.log(`Team engineer inserted: ${engineerId} into team ${team.id}`);
           resolve();
         });
       });
@@ -128,6 +131,7 @@ async function seedTestDatabase() {
     await new Promise((resolve, reject) => {
       db.run("INSERT INTO tasks (id, title, description, status, assignedTo, teamId, dueDate, priority, comments) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [task.id, task.title, task.description, task.status, task.assignedTo, task.teamId, task.dueDate, task.priority, task.comments], (err) => {
         if (err) reject(err);
+        console.log(`Task inserted: ${task.title}`);
         resolve();
       });
     });
