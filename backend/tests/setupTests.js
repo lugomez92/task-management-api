@@ -1,8 +1,14 @@
 process.env.NODE_ENV = 'test';
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('./task-management-test.db');
 const bcrypt = require('bcryptjs');
 const seedData = require('./data/seedDataTests.json');
+const db = new sqlite3.Database('./task-management-test.db', (err) => {
+  if (err) {
+    console.error('Could not connect to the test database:', err);
+  } else {
+    console.log('Connected to the SQLite test database.');
+  }
+});
 
 db.serialize(() => {
   db.run("PRAGMA busy_timeout = 30000");
