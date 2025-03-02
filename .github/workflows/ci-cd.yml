@@ -14,11 +14,11 @@ jobs:
 
     services:
       docker:
-        image: docker:19.03.12
+        image: docker:27.5.1
         options: --privileged
         ports:
-          - 80:80
-
+          - 4000:4000
+          - 3000:3000
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -26,7 +26,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '14'
+          node-version: '20.12.0'
 
       - name: Install backend dependencies
         run: npm install
