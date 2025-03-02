@@ -66,6 +66,18 @@ async function resetDatabase() {
       db.run("DROP TABLE IF EXISTS tasks", (err) => {
         if (err) reject(err);
       });
+      db.run("DELETE FROM sqlite_sequence WHERE name='users'", (err) => {
+        if (err) reject(err);
+      });
+      db.run("DELETE FROM sqlite_sequence WHERE name='teams'", (err) => {
+        if (err) reject(err);
+      });
+      db.run("DELETE FROM sqlite_sequence WHERE name='team_engineers'", (err) => {
+        if (err) reject(err);
+      });
+      db.run("DELETE FROM sqlite_sequence WHERE name='tasks'", (err) => {
+        if (err) reject(err);
+      });
       resolve();
     });
   });
