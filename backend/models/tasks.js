@@ -84,7 +84,7 @@ class Task {
             db.get('SELECT * FROM tasks WHERE id = ?', [id], (err, row) => {
               if (err) reject(err);
               else resolve(row);
-            })
+            });
           }
         }
       );
