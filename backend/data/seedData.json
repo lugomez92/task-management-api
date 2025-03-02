@@ -5,56 +5,64 @@
       "name": "Admin",
       "email": "admin@example.com",
       "password": "admin123",
-      "role": "admin"
+      "role": "admin",
+      "teamId": null
     },
     {
       "id": 2,
       "name": "Manager 1",
       "email": "manager@example.com",
       "password": "manager123",
-      "role": "manager"
+      "role": "manager",
+      "teamId": 1
     },
     {
       "id": 3,
       "name": "Manager 2",
       "email": "manager2@example.com",
       "password": "manager123",
-      "role": "manager"
+      "role": "manager",
+      "teamId": 2
     },
     {
       "id": 4,
       "name": "PM 1",
       "email": "pm@example.com",
       "password": "pm123",
-      "role": "pm"
+      "role": "pm",
+      "teamId": 1
     },
     {
       "id": 5,
       "name": "PM 2",
       "email": "pm2@example.com",
       "password": "pm123",
-      "role": "pm"
+      "role": "pm",
+      "teamId": 2
     },
     {
       "id": 6,
       "name": "Engineer 1",
       "email": "engineer1@example.com",
       "password": "eng123",
-      "role": "engineer"
+      "role": "engineer",
+      "teamId": 1
     },
     {
       "id": 7,
       "name": "Engineer 2",
       "email": "engineer2@example.com",
       "password": "eng456",
-      "role": "engineer"
-    }, 
+      "role": "engineer",
+      "teamId": 1
+    },
     {
       "id": 8,
       "name": "Engineer 3",
       "email": "engineer3@example.com",
       "password": "eng456",
-      "role": "engineer"
+      "role": "engineer",
+      "teamId": 2
     }
   ],
   "teams": [
@@ -80,6 +88,7 @@
       "description": "There is a bug in the authentication flow. Need to investigate.",
       "status": "In Progress",
       "assignedTo": 6,
+      "teamId": 1,
       "dueDate": "2024-12-15",
       "priority": "High",
       "comments": "Started debugging this issue"
@@ -90,6 +99,7 @@
       "description": "Design and implement the user registration form.",
       "status": "Ready",
       "assignedTo": 8,
+      "teamId": 2,
       "dueDate": "2024-12-10",
       "priority": "Medium",
       "comments": "Started investigating"

@@ -60,22 +60,50 @@ const updateTeam = async (req, res) => {
 
 // Add multiple engineers to team.
 const addEngineersToTeam = async (req, res) => {
-  const { teamId, engineerIds } = req.body;
+  const { teamId } = req.params;
+  const { engineerIds } = req.body;
+
+  if (!Array.isArray(engineerIds) || engineerIds.length === 0) {
+    return res.status(400).json({ message: 'Engineer IDs must be a non-empty array' });
+  }
+
   try {
     await Team.addEngineers(teamId, engineerIds);
-    return res.status(200).json({ message: 'Engineers added to team', engineerIds });
+    return res.status(200).json({ message: 'Engineer/s added to team successfully', engineerIds });
   } catch (err) {
     console.error('Error adding engineers:', err);
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
 
-// Remove multiple engineers from a team.
+// Remove one or multiple engineers from a team.
 const removeEngineersFromTeam = async (req, res) => {
-  const { teamId, engineerIds } = req.body;
+  const { teamId } = req.params;
+  const { engineerIds } = req.body;
+
+  if (!Array.isArray(engineerIds) || engineerIds.length === 0) {
+    return res.status(400).json({ message: 'Engineer IDs must be a non-empty array' });
+  }
+
+  console.log(`Attempting to remove engineers with IDs ${engineerIds} from team ${teamId}`);
+
   try {
+    const engineersInTeam = await Team.getEngineersInTeam(teamId);
+    console.log('Engineers in team:', engineersInTeam);
+    console.log('Engineers to be removed:', engineerIds);
+
+    const engineerExists = engineerIds.every(engineerId =>
+      engineersInTeam.some(engineer => engineer.id === parseInt(engineerId))
+    );
+
+    if (!engineerExists) {
+      console.log(`One or more engineers with IDs ${engineerIds} not found in team ${teamId}`);
+      return res.status(404).json({ message: 'One or more engineers not found in team' });
+    }
+
     await Team.removeEngineers(teamId, engineerIds);
-    return res.status(200).json({ message: 'Engineers removed from team' });
+    console.log(`Engineers with IDs ${engineerIds} removed from team ${teamId}`);
+    return res.status(200).json({ message: 'Engineer/s removed from team successfully' });
   } catch (err) {
     console.error('Error removing engineers:', err);
     return res.status(500).json({ message: 'Internal server error' });

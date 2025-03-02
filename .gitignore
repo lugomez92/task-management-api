@@ -30,3 +30,7 @@ build/
 
 #Docker
 docker-compose.override.yml
+
+# Databases
+task-management.db
+task-management-test.db

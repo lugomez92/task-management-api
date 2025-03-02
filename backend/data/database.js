@@ -8,7 +8,6 @@ const db = new sqlite3.Database(process.env.DB_PATH || './task-management.db', (
   }
 });
 
-// Ensure the necessary tables are created
 db.serialize(() => {
   db.run("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT, password TEXT, role TEXT, teamId INTEGER, FOREIGN KEY(teamId) REFERENCES teams(id))");
   db.run("CREATE TABLE IF NOT EXISTS teams (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, managerId INTEGER, pmId INTEGER, FOREIGN KEY(managerId) REFERENCES users(id), FOREIGN KEY(pmId) REFERENCES users(id))");
@@ -17,5 +16,3 @@ db.serialize(() => {
 });
 
 module.exports = db;
-
-

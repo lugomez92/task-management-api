@@ -1,0 +1,82 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Test Admin",
+      "email": "admint@example.com",
+      "password": "admin123",
+      "role": "admin",
+      "teamId": null
+    },
+    {
+      "id": 2,
+      "name": "Test Manager 1",
+      "email": "managert@example.com",
+      "password": "manager123",
+      "role": "manager",
+      "teamId": 1
+    },
+    {
+      "id": 4,
+      "name": "Test Engineer 1",
+      "email": "engineert@example.com",
+      "password": "eng123",
+      "role": "engineer",
+      "teamId": 1
+    },
+    {
+      "name": "Test Manager 2",
+      "email": "managert2@example.com",
+      "password": "manager123",
+      "role": "manager",
+      "teamId": null
+    },
+    {
+      "name": "Test Engineer 2",
+      "email": "engineert2@example.com",
+      "password": "eng123",
+      "role": "engineer",
+      "teamId": null
+    }
+  ],
+  "teams": [
+    {
+      "id": 1,
+      "name": "Test Team",
+      "managerId": 2,
+      "pmId": null,
+      "engineerIds": [4]
+    },
+    {
+      "id": 2,
+      "name": "Test Team",
+      "managerId": 1,
+      "pmId": null,
+      "engineerIds": []
+    }
+  ],
+  "tasks": [
+    {
+      "id": 1,
+      "title": "Test Task 1",
+      "description": "Description for Test Task 1",
+      "status": "Ready",
+      "assignedTo": 4,
+      "teamId": 1,
+      "dueDate": "2024-12-15",
+      "priority": "High",
+      "comments": "Initial task"
+    },
+    {
+      "id": 2,
+      "title": "Test Task 2",
+      "description": "Description for Test Task 2",
+      "status": "In Progress",
+      "assignedTo": 4,
+      "teamId": 1,
+      "dueDate": "2024-12-20",
+      "priority": "Medium",
+      "comments": "Second task"
+    }
+  ]
+}

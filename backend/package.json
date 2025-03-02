@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
+    "test.production": "jest backend/tests/data/productionData.test.js",
     "dev": "nodemon app.js",
     "seed": "node seedDatabase.js"
   },

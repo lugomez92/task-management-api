@@ -53,7 +53,7 @@ class Team {
         (err, rows) => {
           if (err) reject(err);
           else resolve(rows);
-        } 
+        }
       );
     });
   }
